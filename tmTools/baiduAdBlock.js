@@ -18,17 +18,21 @@
     1、childNodes返回的节点包括了#text
     2、区分for-in（枚举对象中的非符号键属性）和for-of（遍历可迭代对象的元素）
     3、区分typeof 和 nodeName(tagName)，以及nodeName返回的是大写
+    4、没有子节点时，firstChild返回null
+    5、优化思路，如果能检测网页的局部刷新，就可以不用定时执行。
     */
    function blockAds(){
-    let content = document.getElementById("content_left").childNodes;   //获取页面所有搜索结果
-    for(let item of content){                                           //遍历
-        if(item.nodeName != "DIV") continue;else{                             //排除非div标签
-            if(!item.hasAttribute("id")){continue;}                         //忽略品牌广告
-            else{
-                if(parseInt(item.getAttribute("id"))>3000){                 
-                    item.style.setProperty("display","none","important");   //不再显示广告
-                }
-           }
+    let items = document.getElementsByTagName("span");      //获取所有span标签
+    for(let item of items){                                 //遍历
+        if(item.firstChild!=null){                          //确保firstChild非null
+            if(item.firstChild.nodeValue=="广告"){          
+            let invItem1 = item.parentNode.parentNode; //找到广告条目容器(延迟加载项)
+            invItem1.style.setProperty("display","none","important");
+            let invItem2= invItem1.parentNode.parentNode; //正常广告加载项
+            if(invItem2.getAttribute("id")!="form" && invItem2.getAttribute("id")!="container"){  //排除两个高级容器
+                invItem2.style.setProperty("display","none","important");
+            }
+            }
         }
     }
 }
@@ -38,3 +42,5 @@ function hideRightContent(){
 
 blockAds(); hideRightContent();
 setInterval(()=>{blockAds(); hideRightContent(); },1000);
+
+
